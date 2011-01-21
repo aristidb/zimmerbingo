@@ -58,11 +58,9 @@ unflattenGrid n = unfoldr $ \x -> case splitAt n x of
                                     ([], _) -> Nothing
                                     (a, b) -> Just (a, b)
 
-randomGrid :: UserConfiguration -> IO [[String]]
 randomGrid UserConfiguration { rooms = r, grid = (w, h) }
     = unflattenGrid w <$> runRVar (sample (w * h) r) DevURandom
       
---inputWidget :: UserConfiguration -> GWidget sub master ()
 inputWidget uc = addHamlet [$hamlet|
                             %div!class="input_container"
                               %form!method="GET"!action=@HomeR@
@@ -76,7 +74,6 @@ inputWidget uc = addHamlet [$hamlet|
                                   %button Update
                             |]
 
-gridWidget :: [[String]] -> GWidget sub master ()
 gridWidget grid = addHamlet [$hamlet|
                              %table!class="grid"
                                $forall grid row
