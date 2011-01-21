@@ -15,7 +15,44 @@ mkYesod "Zimmerbingo" [$parseRoutes|
 / HomeR GET
 |]
 
-instance Yesod Zimmerbingo where approot _ = ""
+instance Yesod Zimmerbingo where
+    approot _ = ""
+    defaultLayout contents = do
+      PageContent title headTags bodyTags <- widgetToPageContent $
+        do
+          addCassius [$cassius|
+                      body
+                        font-family: Verdana,sans-serif
+                        font-size: 12pt
+                      #wrapper
+                        padding-left: 32pt
+                        padding-right: 32pt
+                      .input_container
+                        margin-bottom: 12pt
+                      table.grid
+                        font-size: 36pt
+                        text-align: center
+                        border-collapse: collapse
+                      table.grid td
+                        padding: 5pt
+                        width: 2ex
+                        height: 2ex
+                        border: 1pt solid #888888
+                      @@media print
+                        .input_container { display: none }
+                      |]
+          addWidget contents
+      hamletToRepHtml [$hamlet|
+                       !!!
+                       %html
+                         %head
+                           %title $title$
+                           ^headTags^
+                         %body
+                           #wrapper
+                             %h1 $title$
+                             ^bodyTags^
+                       |]
 
 data UserConfiguration 
     = UserConfiguration {
@@ -64,22 +101,28 @@ randomGrid UserConfiguration { rooms = r, grid = (w, h) }
 inputWidget uc = addHamlet [$hamlet|
                             %div!class="input_container"
                               %form!method="GET"!action=@HomeR@
-                                %p
-                                  %label!for="rooms" Rooms
-                                  %input!name="rooms"!value="$getRooms.uc$"
-                                %p
-                                  %label!for="grid" Grid
-                                  %input!name="grid"!value="$getGrid.uc$"
-                                %p
-                                  %button Update
+                                %table!class="input_table"
+                                  %tr
+                                    %td
+                                      %label!for="rooms" Räume
+                                    %td
+                                      %input!name="rooms"!value="$getRooms.uc$"!size=60
+                                  %tr
+                                    %td
+                                      %label!for="grid" Raster
+                                    %td
+                                       %input!name="grid"!value="$getGrid.uc$"!size=6
+                                  %tr
+                                    %td!colspan="2"
+                                      %button Neu generieren
                             |]
 
 gridWidget grid = addHamlet [$hamlet|
                              %table!class="grid"
                                $forall grid row
-                                 %tr!class="grid_row"
+                                 %tr
                                    $forall row cell
-                                     %td!class="grid_cell" $cell$
+                                     %td $cell$
                              |]
 
 getHomeR = do
@@ -89,9 +132,6 @@ getHomeR = do
   liftIO $ print grid
   defaultLayout $ do
              setTitle "Zimmerbingo"
-             addHamlet [$hamlet|
-                        %h1 Zimmerbingo
-                        |]
              inputWidget uc
              gridWidget grid
 
