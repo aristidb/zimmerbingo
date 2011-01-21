@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeFamilies, QuasiQuotes, OverloadedStrings, NoMonomorphismRestriction, RecordWildCards #-}
+{-# LANGUAGE TypeFamilies, QuasiQuotes, OverloadedStrings, NoMonomorphismRestriction #-}
 import           Yesod
 import           Control.Applicative
 import           Control.Monad
