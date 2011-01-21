@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeFamilies, QuasiQuotes, OverloadedStrings, NoMonomorphismRestriction #-}
+{-# LANGUAGE TypeFamilies, QuasiQuotes, OverloadedStrings, NoMonomorphismRestriction, RecordWildCards #-}
 import           Yesod
 import           Control.Applicative
 import           Control.Monad
@@ -44,20 +44,15 @@ setGrid s uc = case map reads $ words s of
                  [[(w, "")], [(h, "")]] -> Just uc { grid = (w, h) }
                  _                      -> Nothing
 
-fromCookiesMap = M.fromList [("rooms", setRooms), ("grid", setGrid)]
+fromQueryMap = M.fromList [("rooms", setRooms), ("grid", setGrid)]
 
-fromCookies :: UserConfiguration -> [(String, String)] -> Maybe UserConfiguration
-fromCookies = F.foldrM $ \(n, v) uc -> (do
-                                         setter <- M.lookup n fromCookiesMap
+fromQuery :: UserConfiguration -> [(String, String)] -> Maybe UserConfiguration
+fromQuery = F.foldrM $ \(n, v) uc -> (do
+                                         setter <- M.lookup n fromQueryMap
                                          setter v uc) 
                                         <|> return uc
 
-fromCookiesDefault = fromCookies defaultUserConfiguration
-
-toCookiesList = [("rooms", getRooms), ("grid", getGrid)]
-
-toCookies :: Int -> UserConfiguration -> GHandler sub master ()
-toCookies timeout uc = forM_ toCookiesList $ \(name, f) -> setCookie timeout name (f uc)
+fromQueryDefault = fromQuery defaultUserConfiguration
 
 unflattenGrid n = unfoldr $ \x -> case splitAt n x of 
                                     ([], _) -> Nothing
@@ -66,6 +61,20 @@ unflattenGrid n = unfoldr $ \x -> case splitAt n x of
 randomGrid :: UserConfiguration -> IO [[String]]
 randomGrid UserConfiguration { rooms = r, grid = (w, h) }
     = unflattenGrid w <$> runRVar (sample (w * h) r) DevURandom
+      
+--inputWidget :: UserConfiguration -> GWidget sub master ()
+inputWidget uc = addHamlet [$hamlet|
+                            %div!class="input_container"
+                              %form!method="GET"!action=@HomeR@
+                                %p
+                                  %label!for="rooms" Rooms
+                                  %input!name="rooms"!value="$getRooms.uc$"
+                                %p
+                                  %label!for="grid" Grid
+                                  %input!name="grid"!value="$getGrid.uc$"
+                                %p
+                                  %button Update
+                            |]
 
 gridWidget :: [[String]] -> GWidget sub master ()
 gridWidget grid = addHamlet [$hamlet|
@@ -77,8 +86,7 @@ gridWidget grid = addHamlet [$hamlet|
                              |]
 
 getHomeR = do
-  Just uc <- (fromCookiesDefault . reqCookies) `fmap` getRequest
-  toCookies 120 uc
+  Just uc <- (fromQueryDefault . reqGetParams) `fmap` getRequest
   grid <- liftIO $ randomGrid uc
   liftIO $ print uc
   liftIO $ print grid
@@ -87,7 +95,7 @@ getHomeR = do
              addHamlet [$hamlet|
                         %h1 Zimmerbingo
                         |]
-             -- input widget
+             inputWidget uc
              gridWidget grid
 
 main = basicHandler 3000 Zimmerbingo
