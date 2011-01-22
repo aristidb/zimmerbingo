@@ -27,19 +27,6 @@ instance Yesod Zimmerbingo where
                       #wrapper
                         padding-left: 32pt
                         padding-right: 32pt
-                      .input_container
-                        margin-bottom: 12pt
-                      table.grid
-                        font-size: 36pt
-                        text-align: center
-                        border-collapse: collapse
-                      table.grid td
-                        padding: 5pt
-                        width: 2ex
-                        height: 2ex
-                        border: 1pt solid #888888
-                      @@media print
-                        .input_container { display: none }
                       |]
           addWidget contents
       hamletToRepHtml [$hamlet|
@@ -98,33 +85,52 @@ unflattenGrid n = unfoldr $ \x -> case splitAt n x of
 randomGrid UserConfiguration { rooms = r, grid = (w, h) }
     = unflattenGrid w <$> runRVar (sample (w * h) r) DevURandom
       
-inputWidget uc = addHamlet [$hamlet|
-                            %div!class="input_container"
-                              %p Sie können diese Seite bedenkenlos drucken, dieses Formular wird nicht angezeigt werden.
-                              %form!method="GET"!action=@HomeR@
-                                %table!class="input_table"
-                                  %tr
-                                    %td
-                                      %label!for="rooms" Räume
-                                    %td
-                                      %input!name="rooms"!value="$getRooms.uc$"!size=60
-                                  %tr
-                                    %td
-                                      %label!for="grid" Raster
-                                    %td
-                                       %input!name="grid"!value="$getGrid.uc$"!size=6
-                                  %tr
-                                    %td!colspan="2"
-                                      %button Neu generieren
-                            |]
+inputWidget uc = do
+  addCassius [$cassius|
+              .input_container
+                margin-bottom: 12pt
+              @@media print
+                .input_container { display: none }
+              |]
+  addHamlet [$hamlet|
+             %div!class="input_container"
+               %p Sie können diese Seite bedenkenlos drucken, dieses Formular wird nicht angezeigt werden.
+               %form!method="GET"!action=@HomeR@
+               %table!class="input_table"
+                 %tr
+                   %td
+                     %label!for="rooms" Räume
+                   %td
+                     %input!name="rooms"!value="$getRooms.uc$"!size=60
+                 %tr
+                   %td
+                     %label!for="grid" Raster
+                   %td
+                     %input!name="grid"!value="$getGrid.uc$"!size=6
+                 %tr
+                     %td!colspan="2"
+                       %button Neu generieren
+                 |]
 
-gridWidget grid = addHamlet [$hamlet|
-                             %table!class="grid"
-                               $forall grid row
-                                 %tr
-                                   $forall row cell
-                                     %td $cell$
-                             |]
+gridWidget grid = do
+  addCassius [$cassius|
+              table.grid
+                font-size: 36pt
+                text-align: center
+                border-collapse: collapse
+              table.grid td
+                padding: 5pt
+                width: 2ex
+                height: 2ex
+                border: 1pt solid #888888
+              |]
+  addHamlet [$hamlet|
+             %table!class="grid"
+               $forall grid row
+                 %tr
+                   $forall row cell
+                     %td $cell$
+             |]
 
 getHomeR = do
   Just uc <- (fromQueryDefault . reqGetParams) `fmap` getRequest
