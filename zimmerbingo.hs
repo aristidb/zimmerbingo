@@ -96,20 +96,20 @@ inputWidget uc = do
              %div!class="input_container"
                %p Sie können diese Seite bedenkenlos drucken, dieses Formular wird nicht angezeigt werden.
                %form!method="GET"!action=@HomeR@
-               %table!class="input_table"
-                 %tr
-                   %td
-                     %label!for="rooms" Räume
-                   %td
-                     %input!name="rooms"!value="$getRooms.uc$"!size=60
-                 %tr
-                   %td
-                     %label!for="grid" Raster
-                   %td
-                     %input!name="grid"!value="$getGrid.uc$"!size=6
-                 %tr
+                 %table!class="input_table"
+                   %tr
+                     %td
+                       %label!for="rooms" Räume
+                     %td
+                       %input!name="rooms"!value="$getRooms.uc$"!size=60
+                   %tr
+                     %td
+                       %label!for="grid" Raster
+                     %td
+                       %input!name="grid"!value="$getGrid.uc$"!size=6
+                   %tr
                      %td!colspan="2"
-                       %button Neu generieren
+                       %button!type="submit" Neu generieren
                  |]
 
 gridWidget grid = do
