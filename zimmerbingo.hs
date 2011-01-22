@@ -89,6 +89,7 @@ inputWidget uc = do
   addCassius [$cassius|
               .input_container
                 margin-bottom: 12pt
+                background-color: #EEEEEE
               @@media print
                 .input_container { display: none }
               |]
