@@ -100,6 +100,7 @@ randomGrid UserConfiguration { rooms = r, grid = (w, h) }
       
 inputWidget uc = addHamlet [$hamlet|
                             %div!class="input_container"
+                              %p Sie können diese Seite bedenkenlos drucken, dieses Formular wird nicht angezeigt werden.
                               %form!method="GET"!action=@HomeR@
                                 %table!class="input_table"
                                   %tr
