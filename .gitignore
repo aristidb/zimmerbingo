@@ -1,0 +1,5 @@
+*.o
+client_session_key.aes
+*~
+*.hi
+zimmerbingo
